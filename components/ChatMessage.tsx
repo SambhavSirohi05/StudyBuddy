@@ -1,0 +1,159 @@
+'use client';
+
+import { Message, StudyNotes } from '@/types';
+import { clsx } from 'clsx';
+import { Bot, User, Copy, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import DiagramRenderer from './DiagramRenderer';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ErrorBoundary from './ErrorBoundary';
+
+interface ChatMessageProps {
+    message: Message;
+}
+
+export default function ChatMessage({ message }: ChatMessageProps) {
+    return (
+        <ErrorBoundary>
+            <ChatMessageContent message={message} />
+        </ErrorBoundary>
+    );
+}
+
+function ChatMessageContent({ message }: ChatMessageProps) {
+    const isUser = message.role === 'user';
+    const isNotes = typeof message.content !== 'string';
+
+    return (
+        <div className={clsx(
+            "w-full text-base border-b border-black/10 dark:border-gray-900/50 text-gray-800 dark:text-gray-100",
+            isUser ? "bg-white dark:bg-gray-800" : "bg-gray-50 dark:bg-[#444654]"
+        )}>
+            <div className={clsx("w-full py-2 md:py-4 border-b border-black/5", isUser ? "bg-white" : "bg-gray-50")}>
+                <div className="text-base gap-4 md:gap-6 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-4 md:py-6 flex lg:px-0 m-auto">
+
+                    {/* Avatar */}
+                    <div className="w-8 flex flex-col relative items-end">
+                        <div className={clsx(
+                            "relative h-7 w-7 rounded-sm flex items-center justify-center text-white flex-shrink-0",
+                            isUser ? "bg-gray-500" : "bg-green-500"
+                        )}>
+                            {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative flex-1 overflow-hidden">
+                        {isUser ? (
+                            <div className="font-semibold whitespace-pre-wrap">{message.content as string}</div>
+                        ) : (
+                            <div className="markdown prose prose-slate max-w-none break-words dark:prose-invert">
+                                {isNotes ? (
+                                    <StudyNotesRenderer notes={message.content as StudyNotes} />
+                                ) : (
+                                    <ReactMarkdown>{message.content as string}</ReactMarkdown>
+                                )}
+
+                                {/* Footer Icons for Assistant */}
+                                {!isUser && (
+                                    <div className="flex gap-4 mt-4 text-gray-400">
+                                        <Copy className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+                                        <ThumbsUp className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+                                        <ThumbsDown className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Inline Renderer for the StudyNotes object
+function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
+    if (!notes) return <div className="text-red-500">Error: No notes data available.</div>;
+
+    return (
+        <div className="space-y-8">
+            {/* Conversational Mode */}
+            {notes.is_conversational && notes.conversational_response ? (
+                <div className="prose prose-slate dark:prose-invert max-w-none">
+                    <ReactMarkdown>{notes.conversational_response}</ReactMarkdown>
+                </div>
+            ) : (
+                <>
+                    {/* Title */}
+                    <div>
+                        <h1 className="text-2xl font-bold mb-2">{notes.topic}</h1>
+                        <hr className="border-gray-200 my-4" />
+                    </div>
+
+                    {/* Subtopics with Inline Diagrams */}
+                    <div className="space-y-10">
+                        {notes.subtopics?.length > 0 ? notes.subtopics.map((subtopic, idx) => (
+                            <div key={idx} className="group">
+                                <h2 className="text-xl font-semibold mb-3">{subtopic.title}</h2>
+
+                                {/* Text Explanation */}
+                                <div className="mb-6 leading-relaxed">
+                                    <ReactMarkdown>{subtopic.explanation}</ReactMarkdown>
+                                </div>
+
+                                {/* Diagrams */}
+                                {subtopic.diagrams?.map((diagram, dIdx) => (
+                                    <div key={dIdx} className="my-6 bg-white border border-gray-200 rounded-md p-2 shadow-sm">
+                                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2 pt-2">
+                                            {diagram.diagram_title}
+                                        </div>
+                                        <div className="border-t border-gray-100 mb-2"></div>
+                                        <DiagramRenderer
+                                            code={diagram.diagram_code}
+                                            id={`msg-diagram-${idx}-${dIdx}`}
+                                            type={diagram.diagram_type}
+                                        />
+                                        <div className="text-sm bg-gray-50/50 p-3 rounded text-gray-600 italic mt-2 border-t border-gray-100">
+                                            {diagram.diagram_explanation}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )) : (
+                            <div className="text-gray-500 italic">No detailed topics provided.</div>
+                        )}
+                    </div>
+
+                    {/* Exam Notes & Mistakes */}
+                    <div className="grid md:grid-cols-2 gap-4 mt-8">
+                        <div className="bg-blue-50/30 p-4 rounded border border-blue-100">
+                            <h3 className="font-bold text-blue-800 mb-2">Exam Points</h3>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700">
+                                {notes.exam_notes?.map((n, i) => <li key={i}>{n}</li>)}
+                            </ul>
+                        </div>
+                        <div className="bg-red-50/30 p-4 rounded border border-red-100">
+                            <h3 className="font-bold text-red-800 mb-2">Common Mistakes</h3>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700">
+                                {notes.common_mistakes?.map((n, i) => <li key={i}>{n}</li>)}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Revision Tips */}
+                    <div className="bg-green-50/30 p-4 rounded border border-green-100 mt-4">
+                        <h3 className="font-bold text-green-800 mb-2">Quick Revision</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {notes.revision_tips?.map((t, i) => (
+                                <span key={i} className="text-xs bg-white border border-green-200 px-2 py-1 rounded text-green-700 font-medium">
+                                    {t}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
