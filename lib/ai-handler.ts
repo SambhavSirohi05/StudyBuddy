@@ -4,8 +4,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { StudyNotes } from "@/types";
 import { MOCK_BST_NOTES } from "./mock-ai";
 
-// Vercel Server Function Timeout Configuration
-
 const SYSTEM_PROMPT = `
 You are an advanced Study Assistant AI capable of generating detailed, structured study notes with visual diagrams.
 Your output MUST be a valid JSON object matching this schema:
@@ -33,6 +31,12 @@ Your output MUST be a valid JSON object matching this schema:
   "revision_tips": string[]
 }
 
+CRITICAL RULES FOR MERMAID DIAGRAMS:
+1. Always use "graph TD" or "graph LR" for flowcharts.
+2. YOU MUST QUOTE ALL LABELS. Example: A["Start (Process)"] --> B["End [Finish]"]
+3. Do NOT use parentheses (), brackets [], or braces {} outside of quotes.
+4. Escape quotes inside labels if necessary.
+5. Ensure the syntax is strictly valid mermaid.js.
 CRITICAL: Return ONLY the JSON object. Do not wrap it in markdown code blocks.
 `;
 
@@ -64,8 +68,15 @@ export async function generateStudyNotesAction(userPrompt: string) {
 
         if (!text) throw new Error("Empty response from AI");
 
-        // CLEANUP: Remove markdown code blocks if present
+        // CLEANUP: Remove markdown code blocks
         text = text.replace(/```json\n?|\n?```/g, "").trim();
+
+        // Better Regex for JSON extraction if the above fails to catch trailing text
+        const firstBrace = text.indexOf('{');
+        const lastBrace = text.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            text = text.substring(firstBrace, lastBrace + 1);
+        }
 
         try {
             const data = JSON.parse(text) as StudyNotes;
@@ -74,8 +85,7 @@ export async function generateStudyNotesAction(userPrompt: string) {
         } catch (parseError) {
             console.error("JSON Parse Error:", parseError);
             console.log("Raw Text:", text);
-            
-            // Fallback: Use text as conversational response
+
             return {
                 is_conversational: true,
                 conversational_response: text,
