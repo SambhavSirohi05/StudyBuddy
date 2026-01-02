@@ -5,7 +5,6 @@ import { StudyNotes } from "@/types";
 import { MOCK_BST_NOTES } from "./mock-ai";
 
 // Vercel Server Function Timeout Configuration
-export const maxDuration = 60;
 
 const SYSTEM_PROMPT = `
 You are an advanced Study Assistant AI capable of generating detailed, structured study notes with visual diagrams.

@@ -1,3 +1,4 @@
+"use client";
 
 import { useState, useEffect } from 'react';
 import { Message, ChatSession } from '@/types';
