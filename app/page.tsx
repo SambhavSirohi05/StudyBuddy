@@ -27,9 +27,6 @@ export default function Home() {
         // Add User Message. Capture the Session ID used!
         const userMsg: Message = { role: 'user', content: inputStr };
         const sessionIdObj = addMessageToCurrent(userMsg);
-        // addMessageToCurrent returns string | undefined. 
-        // We know it returns string if it created a new chat, but TypeScript might infer void if not typed strictly.
-        // But our patched store returns the ID.
 
         // Ensure we have a valid ID.
         const activeSessionId = typeof sessionIdObj === 'string' ? sessionIdObj : currentSessionId;
@@ -57,7 +54,7 @@ export default function Home() {
     };
 
     return (
-        <main className="flex h-screen bg-white overflow-hidden">
+        <main className="flex h-screen bg-white dark:bg-gray-900 overflow-hidden transition-colors duration-200">
             {/* Desktop Sidebar (Always Visible) */}
             <div className="hidden md:block h-full">
                 <Sidebar
