@@ -27,10 +27,10 @@ function ChatMessageContent({ message }: ChatMessageProps) {
 
     return (
         <div className={clsx(
-            "w-full text-base border-b border-black/10 dark:border-gray-900/50 text-gray-800 dark:text-gray-100",
-            isUser ? "bg-white dark:bg-gray-800" : "bg-gray-50 dark:bg-[#444654]"
+            "w-full text-base border-b border-white/10 text-gray-100",
+            isUser ? "bg-[#1F1F1F]" : "bg-[#2A2A2A]"
         )}>
-            <div className={clsx("w-full py-2 md:py-4 border-b border-black/5", isUser ? "bg-white" : "bg-gray-50")}>
+            <div className={clsx("w-full py-2 md:py-4 border-b border-white/5", isUser ? "bg-[#1F1F1F]" : "bg-[#2A2A2A]")}>
                 <div className="text-base gap-4 md:gap-6 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-4 md:py-6 flex lg:px-0 m-auto">
 
                     {/* Avatar */}
@@ -87,15 +87,15 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                 <>
                     {/* Title */}
                     <div>
-                        <h1 className="text-2xl font-bold mb-2">{notes.topic}</h1>
-                        <hr className="border-gray-200 my-4" />
+                        <h1 className="text-2xl font-bold mb-2 text-gray-100">{notes.topic}</h1>
+                        <hr className="border-white/10 my-4" />
                     </div>
 
                     {/* Subtopics with Inline Diagrams */}
                     <div className="space-y-10">
                         {notes.subtopics?.length > 0 ? notes.subtopics.map((subtopic, idx) => (
                             <div key={idx} className="group">
-                                <h2 className="text-xl font-semibold mb-3">{subtopic.title}</h2>
+                                <h2 className="text-xl font-semibold mb-3 text-gray-100">{subtopic.title}</h2>
 
                                 {/* Text Explanation */}
                                 <div className="mb-6 leading-relaxed">
@@ -104,7 +104,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
 
                                 {/* Diagrams */}
                                 {subtopic.diagrams?.map((diagram, dIdx) => (
-                                    <div key={dIdx} className="my-6 bg-white border border-gray-200 rounded-md p-2 shadow-sm">
+                                    <div key={dIdx} className="my-6 bg-[#1F1F1F] border border-white/10 rounded-md p-2 shadow-sm">
                                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2 pt-2">
                                             {diagram.diagram_title}
                                         </div>
@@ -114,7 +114,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                                             id={`msg-diagram-${idx}-${dIdx}`}
                                             type={diagram.diagram_type}
                                         />
-                                        <div className="text-sm bg-gray-50/50 p-3 rounded text-gray-600 italic mt-2 border-t border-gray-100">
+                                        <div className="text-sm bg-[#2A2A2A] p-3 rounded text-gray-400 italic mt-2 border-t border-white/10">
                                             {diagram.diagram_explanation}
                                         </div>
                                     </div>
@@ -127,26 +127,26 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
 
                     {/* Exam Notes & Mistakes */}
                     <div className="grid md:grid-cols-2 gap-4 mt-8">
-                        <div className="bg-blue-50/30 p-4 rounded border border-blue-100">
-                            <h3 className="font-bold text-blue-800 mb-2">Exam Points</h3>
-                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700">
+                        <div className="bg-blue-900/20 p-4 rounded border border-blue-800/30">
+                            <h3 className="font-bold text-blue-300 mb-2">Exam Points</h3>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-300">
                                 {notes.exam_notes?.map((n, i) => <li key={i}>{n}</li>)}
                             </ul>
                         </div>
-                        <div className="bg-red-50/30 p-4 rounded border border-red-100">
-                            <h3 className="font-bold text-red-800 mb-2">Common Mistakes</h3>
-                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700">
+                        <div className="bg-red-900/20 p-4 rounded border border-red-800/30">
+                            <h3 className="font-bold text-red-300 mb-2">Common Mistakes</h3>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-300">
                                 {notes.common_mistakes?.map((n, i) => <li key={i}>{n}</li>)}
                             </ul>
                         </div>
                     </div>
 
                     {/* Revision Tips */}
-                    <div className="bg-green-50/30 p-4 rounded border border-green-100 mt-4">
-                        <h3 className="font-bold text-green-800 mb-2">Quick Revision</h3>
+                    <div className="bg-green-900/20 p-4 rounded border border-green-800/30 mt-4">
+                        <h3 className="font-bold text-green-300 mb-2">Quick Revision</h3>
                         <div className="flex flex-wrap gap-2">
                             {notes.revision_tips?.map((t, i) => (
-                                <span key={i} className="text-xs bg-white border border-green-200 px-2 py-1 rounded text-green-700 font-medium">
+                                <span key={i} className="text-xs bg-[#1F1F1F] border border-green-800/50 px-2 py-1 rounded text-green-300 font-medium">
                                     {t}
                                 </span>
                             ))}
