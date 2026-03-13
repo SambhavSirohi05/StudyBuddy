@@ -125,6 +125,33 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                         )}
                     </div>
 
+                    {/* Comparison Table */}
+                    {notes.comparison_table && (
+                        <div className="mt-10 overflow-x-auto">
+                            <h2 className="text-xl font-semibold mb-4 text-gray-100">{notes.comparison_table.title}</h2>
+                            <table className="w-full text-left border-collapse min-w-[500px]">
+                                <thead>
+                                    <tr className="border-b border-white/10">
+                                        <th className="py-4 px-2 font-semibold text-gray-400 text-sm uppercase tracking-wider w-1/4">Aspect</th>
+                                        {notes.comparison_table.columns.map((col, idx) => (
+                                            <th key={idx} className="py-4 px-2 font-semibold text-gray-100 text-base">{col}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {notes.comparison_table.rows.map((row, rIdx) => (
+                                        <tr key={rIdx} className="hover:bg-white/[0.02] transition-colors">
+                                            <td className="py-4 px-2 font-semibold text-gray-100 align-top">{row.aspect}</td>
+                                            {row.values.map((val, vIdx) => (
+                                                <td key={vIdx} className="py-4 px-2 text-gray-300 leading-relaxed align-top">{val}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
                     {/* Exam Notes & Mistakes */}
                     <div className="grid md:grid-cols-2 gap-4 mt-8">
                         <div className="bg-blue-900/20 p-4 rounded border border-blue-800/30">

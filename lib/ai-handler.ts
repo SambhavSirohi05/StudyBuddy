@@ -35,10 +35,22 @@ Your output MUST be a valid JSON object matching this schema:
       ]
     }
   ],
+  "comparison_table": {
+    "title": string,
+    "columns": string[],
+    "rows": [{ "aspect": string, "values": string[] }]
+  } | null,
   "exam_notes": string[],
   "common_mistakes": string[],
   "revision_tips": string[]
 }
+
+COMPARISON TABLE RULES:
+- If the user asks about differences, comparisons, or "vs" topics (e.g., "TCP vs UDP", "Stack vs Queue", "BFS vs DFS"), you MUST include a "comparison_table".
+- "columns" should be the names of the items being compared (e.g., ["TCP", "UDP"]).
+- "rows" should have an "aspect" (the comparison criteria) and "values" (one per column).
+- Include 5-8 meaningful comparison rows.
+- If the topic is NOT a comparison, set "comparison_table" to null.
 
 CRITICAL RULES FOR MERMAID DIAGRAMS:
 1. Always use "graph TD" or "graph LR" for flowcharts.
