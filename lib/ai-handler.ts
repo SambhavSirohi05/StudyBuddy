@@ -33,10 +33,12 @@ Your output MUST be a valid JSON object matching this schema:
 
 CRITICAL RULES FOR MERMAID DIAGRAMS:
 1. Always use "graph TD" or "graph LR" for flowcharts.
-2. YOU MUST QUOTE ALL LABELS. Example: A["Start (Process)"] --> B["End [Finish]"]
-3. Do NOT use parentheses (), brackets [], or braces {} outside of quotes.
-4. Escape quotes inside labels if necessary.
-5. Ensure the syntax is strictly valid mermaid.js.
+2. EVERY node label MUST be wrapped in double quotes inside brackets. Example: A["Start"] --> B["End"]
+3. NEVER use unquoted labels. WRONG: A[Start Process] CORRECT: A["Start Process"]
+4. For labels with special characters like parentheses, brackets, pipes, or ampersands, ALWAYS quote them: A["Label (with parens)"] --> B["Label [with brackets]"]
+5. Use simple alphanumeric node IDs (A, B, C1, node1, etc). Do NOT use special characters in node IDs.
+6. Use --> for arrows, --- for lines, -.-> for dotted arrows.
+7. Ensure the syntax is strictly valid mermaid.js. Test mentally before outputting.
 CRITICAL: Return ONLY the JSON object. Do not wrap it in markdown code blocks.
 `;
 
