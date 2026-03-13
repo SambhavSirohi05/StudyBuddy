@@ -104,12 +104,12 @@ export async function generateStudyNotesAction(userPrompt: string, previousMessa
         const apiKey = process.env.GEMINI_API_KEY;
         console.log("DEBUG: API Key present?", !!apiKey);
 
-        if (!apiKey) {
-            console.warn("No API Key found. Using Mock.");
-            return MOCK_BST_NOTES;
-        }
+        // ALWAYS Return mock to save API quota while testing UI
+        console.warn("Forcing Mock Response for UI testing.");
+        await new Promise(res => setTimeout(res, 1500)); // fake delay
+        return MOCK_BST_NOTES;
 
-        const genAI = new GoogleGenerativeAI(apiKey);
+        const genAI = new GoogleGenerativeAI(apiKey as string);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
             generationConfig: {

@@ -127,7 +127,7 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
     return (
         <>
             <div
-                className={`my-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto flex justify-center ${!error ? 'cursor-zoom-in hover:shadow-md' : ''} transition-shadow`}
+                className={`my-4 p-4 bg-white rounded-xl border border-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.1)] overflow-hidden flex justify-center ${!error ? 'cursor-zoom-in hover:shadow-[0_0_20px_rgba(0,0,0,0.15)]' : ''} transition-shadow`}
                 onClick={() => !error && setIsZoomed(true)}
                 title={!error ? 'Click to zoom' : undefined}
             >
