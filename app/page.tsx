@@ -36,7 +36,7 @@ export default function Home() {
 
         try {
             // Fetch AI Response (Real or Mock based on Env)
-            const notes = await generateStudyNotesAction(inputStr);
+            const notes = await generateStudyNotesAction(inputStr, messages);
 
             // Add AI Message with Notes Object to the SAME session
             const aiMsg: Message = { role: 'assistant', content: notes };

@@ -1,11 +1,20 @@
 'use server';
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { StudyNotes } from "@/types";
+import { GoogleGenerativeAI, Content } from "@google/generative-ai";
+import { StudyNotes, Message } from "@/types";
 import { MOCK_BST_NOTES } from "./mock-ai";
+
+const MAX_HISTORY_MESSAGES = 10; // Keep last 10 messages to stay token-efficient on free tier
 
 const SYSTEM_PROMPT = `
 You are an advanced Study Assistant AI capable of generating detailed, structured study notes with visual diagrams.
+You have memory of previous messages in this conversation. Use them to understand context and follow-up questions.
+
+IMPORTANT RULES FOR FOLLOW-UP MESSAGES:
+- If the user asks a follow-up like "explain that simpler", "give me a diagram", "compare it with X", etc., you MUST generate FULL study notes (with topic, subtopics, diagrams, exam_notes, etc.) — NOT just a conversational response.
+- ONLY set "is_conversational": true for greetings ("hi", "hello", "thanks") or questions completely unrelated to studying. For EVERYTHING else, generate full structured notes.
+- When a follow-up references something from earlier (like "that", "it", "this topic"), use the conversation history to understand what they're referring to.
+
 Your output MUST be a valid JSON object matching this schema:
 {
   "is_conversational": boolean, 
@@ -42,7 +51,43 @@ CRITICAL RULES FOR MERMAID DIAGRAMS:
 CRITICAL: Return ONLY the JSON object. Do not wrap it in markdown code blocks.
 `;
 
-export async function generateStudyNotesAction(userPrompt: string) {
+/**
+ * Convert app messages to Gemini's history format.
+ * Assistant messages (StudyNotes) are summarized to save tokens.
+ */
+function buildChatHistory(messages: Message[]): Content[] {
+    // Take only the last N messages
+    const recentMessages = messages.slice(-MAX_HISTORY_MESSAGES);
+
+    return recentMessages.map((msg) => {
+        if (msg.role === 'user') {
+            return {
+                role: 'user' as const,
+                parts: [{ text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
+            };
+        } else {
+            // Summarize assistant StudyNotes to save tokens
+            let summary: string;
+            if (typeof msg.content === 'string') {
+                summary = msg.content;
+            } else {
+                const notes = msg.content as StudyNotes;
+                if (notes.is_conversational && notes.conversational_response) {
+                    summary = notes.conversational_response;
+                } else {
+                    const subtopicTitles = notes.subtopics?.map(s => s.title).join(', ') || '';
+                    summary = `Generated study notes on "${notes.topic}". Subtopics covered: ${subtopicTitles}`;
+                }
+            }
+            return {
+                role: 'model' as const,
+                parts: [{ text: summary }],
+            };
+        }
+    });
+}
+
+export async function generateStudyNotesAction(userPrompt: string, previousMessages: Message[] = []) {
     try {
         const apiKey = process.env.GEMINI_API_KEY;
         console.log("DEBUG: API Key present?", !!apiKey);
@@ -57,13 +102,16 @@ export async function generateStudyNotesAction(userPrompt: string) {
             model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json",
-            }
+            },
+            systemInstruction: SYSTEM_PROMPT,
         });
 
-        const result = await model.generateContent([
-            SYSTEM_PROMPT,
-            `Generate complete study notes for: "${userPrompt}"`
-        ]);
+        // Build conversation history from previous messages
+        const history = buildChatHistory(previousMessages);
+
+        // Use multi-turn chat for context awareness
+        const chat = model.startChat({ history });
+        const result = await chat.sendMessage(`Generate complete study notes for: "${userPrompt}"`);
 
         const response = result.response;
         let text = response.text();
@@ -109,3 +157,4 @@ export async function generateStudyNotesAction(userPrompt: string) {
         throw new Error("Failed to generate response. Please try again.");
     }
 }
+
