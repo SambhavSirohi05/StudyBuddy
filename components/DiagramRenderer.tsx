@@ -10,6 +10,65 @@ interface DiagramRendererProps {
     type: string;
 }
 
+/**
+ * Sanitize AI-generated Mermaid code to fix common syntax issues.
+ * - Ensures node labels containing special characters are properly quoted.
+ * - Removes problematic characters that break the parser.
+ */
+function sanitizeMermaidCode(code: string): string {
+    let sanitized = code.trim();
+
+    // Fix subgraph labels with special characters
+    // e.g. "subgraph Sender (Encapsulation)" -> "subgraph sender_encapsulation ["Sender (Encapsulation)"]"
+    sanitized = sanitized.replace(
+        /^(\s*subgraph\s+)(.+)$/gm,
+        (match, prefix, label) => {
+            const trimmedLabel = label.trim();
+            // Already has bracket syntax like: subgraph id ["Label"]
+            if (/\[.*\]/.test(trimmedLabel)) return match;
+            // If label contains special characters, use the bracket syntax
+            if (/[(){}[\]<>|&]/.test(trimmedLabel)) {
+                // Create a safe ID from the label
+                const safeId = trimmedLabel.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
+                return `${prefix}${safeId} ["${trimmedLabel.replace(/"/g, '#quot;')}"]`;
+            }
+            return match;
+        }
+    );
+
+    // Fix node definitions like A[Label (with parens)] -> A["Label (with parens)"]
+    // Only quote if the label isn't already quoted
+    sanitized = sanitized.replace(
+        /(\b\w+)\[([^\]"]+)\]/g,
+        (match, nodeId, label) => {
+            // Skip subgraph lines (already handled above)
+            if (nodeId === 'subgraph') return match;
+            // If label contains special characters that break mermaid, wrap in quotes
+            if (/[(){}[\]<>|&]/.test(label)) {
+                return `${nodeId}["${label.replace(/"/g, '#quot;')}"]`;
+            }
+            return match;
+        }
+    );
+
+    // Fix (round) node definitions: A(Label (x)) -> A("Label (x)")
+    sanitized = sanitized.replace(
+        /(\b\w+)\(([^)"]+)\)/g,
+        (match, nodeId, label) => {
+            if (nodeId === 'subgraph') return match;
+            if (/[(){}[\]<>|&]/.test(label)) {
+                return `${nodeId}("${label.replace(/"/g, '#quot;')}")`;
+            }
+            return match;
+        }
+    );
+
+    // Remove any completely empty lines between nodes that could cause issues
+    sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+
+    return sanitized;
+}
+
 export default function DiagramRenderer({ code, id, type }: DiagramRendererProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [svg, setSvg] = useState<string>('');
@@ -28,23 +87,32 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
 
     useEffect(() => {
         const renderDiagram = async () => {
-            try {
-                if (type === 'mermaid' && containerRef.current) {
-                    // Generate an ID for the SVG
-                    const svgId = `mermaid-svg-${id}`;
-                    const { svg } = await mermaid.render(svgId, code);
+            if (type !== 'mermaid' || !containerRef.current) return;
+
+            const svgId = `mermaid-svg-${id}`;
+
+            // Try rendering original code first, then sanitized version
+            const attempts = [code, sanitizeMermaidCode(code)];
+
+            for (const attempt of attempts) {
+                try {
+                    const { svg } = await mermaid.render(svgId, attempt);
                     setSvg(svg);
                     setError(null);
 
-                    // Create a data URL from the SVG for the modal image
                     const blob = new Blob([svg], { type: 'image/svg+xml' });
                     const url = URL.createObjectURL(blob);
                     setSvgDataUrl(url);
+                    return; // Success — stop trying
+                } catch (err) {
+                    console.warn('Mermaid render attempt failed:', err);
+                    // Continue to next attempt
                 }
-            } catch (err) {
-                console.error('Mermaid rendering error:', err);
-                setError('Failed to render diagram.');
             }
+
+            // Both attempts failed — show graceful fallback
+            console.error('Mermaid rendering failed for all attempts');
+            setError('Diagram syntax error — showing raw code below.');
         };
 
         renderDiagram();
@@ -59,12 +127,17 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
     return (
         <>
             <div
-                className="my-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto flex justify-center cursor-zoom-in hover:shadow-md transition-shadow"
+                className={`my-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto flex justify-center ${!error ? 'cursor-zoom-in hover:shadow-md' : ''} transition-shadow`}
                 onClick={() => !error && setIsZoomed(true)}
-                title="Click to zoom"
+                title={!error ? 'Click to zoom' : undefined}
             >
                 {error ? (
-                    <div className="text-red-500 text-sm p-2">{error}</div>
+                    <div className="w-full">
+                        <div className="text-amber-600 text-sm font-medium mb-2">⚠️ {error}</div>
+                        <pre className="text-xs text-gray-600 bg-gray-50 rounded-md p-3 overflow-x-auto whitespace-pre-wrap font-mono">
+                            {code}
+                        </pre>
+                    </div>
                 ) : (
                     <div
                         ref={containerRef}
