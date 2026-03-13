@@ -147,9 +147,9 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                     </div>
 
                     {/* Subtopics with Inline Diagrams */}
-                    <div className="space-y-8">
+                    <div className="space-y-10">
                         {notes.subtopics?.length > 0 ? notes.subtopics.map((subtopic, idx) => (
-                            <div key={idx} className="group p-5 -mx-5 rounded-2xl hover:bg-white/[0.02] transition-colors duration-300">
+                            <div key={idx} className="group">
                                 <h2 className="text-xl font-semibold mb-3 text-gray-100">{subtopic.title}</h2>
 
                                 {/* Text Explanation */}
@@ -159,7 +159,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
 
                                 {/* Diagrams */}
                                 {subtopic.diagrams?.map((diagram, dIdx) => (
-                                    <div key={dIdx} className="my-6 bg-[#1F1F1F] border border-white/10 rounded-xl p-2 shadow-sm hover:border-white/20 hover:shadow-lg hover:shadow-black/50 transition-all duration-300">
+                                    <div key={dIdx} className="my-6 bg-[#1F1F1F] border border-white/10 rounded-xl p-2 shadow-sm overflow-hidden hover:border-white/20 hover:shadow-lg hover:shadow-black/50 transition-all duration-300">
                                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2 pt-2">
                                             {diagram.diagram_title}
                                         </div>
@@ -169,7 +169,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                                             id={`msg-diagram-${idx}-${dIdx}`}
                                             type={diagram.diagram_type}
                                         />
-                                        <div className="text-sm bg-[#2A2A2A] p-3 rounded text-gray-400 italic mt-2 border-t border-white/10">
+                                        <div className="text-sm px-4 pb-4 rounded text-gray-400 italic">
                                             {diagram.diagram_explanation}
                                         </div>
                                     </div>

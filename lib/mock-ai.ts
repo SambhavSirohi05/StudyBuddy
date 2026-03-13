@@ -29,7 +29,7 @@ export const MOCK_BST_NOTES: StudyNotes = {
         },
         {
             title: "2. Insertion Operation",
-            explanation: "To insert a value **V**: Start at root. If V < Current, move Left. If V > Current, move Right. Repeat until a NULL position is found, then insert V there.",
+            explanation: "To insert a value **V**: Start at root. If V < Current, move Left. If V > Current, move Right. Repeat until a NULL position is found, then insert V there.\n\n```python\ndef insert(root, key):\n    if root is None:\n        return Node(key)\n    if key < root.val:\n        root.left = insert(root.left, key)\n    else:\n        root.right = insert(root.right, key)\n    return root\n```",
             diagrams: [
                 {
                     diagram_title: "Insert 8 into BST",
@@ -65,6 +65,16 @@ export const MOCK_BST_NOTES: StudyNotes = {
             ]
         }
     ],
+    comparison_table: {
+        title: "BST vs AVL Tree vs Red-Black Tree",
+        columns: ["BST", "AVL Tree", "Red-Black Tree"],
+        rows: [
+            { aspect: "Insertion Time", values: ["O(log n) avg, O(n) worst", "O(log n)", "O(log n)"] },
+            { aspect: "Search Time", values: ["O(log n) avg, O(n) worst", "O(log n) (Faster)", "O(log n) (Slightly slower than AVL)"] },
+            { aspect: "Balance Condition", values: ["None", "Strict (Height diff ≤ 1)", "Loose (Black Node limits)"] },
+            { aspect: "Use Case", values: ["General simple data", "Read-heavy operations", "Write-heavy operations (e.g. Map in Java)"] }
+        ]
+    },
     exam_notes: [
         "Height of a balanced BST is O(log n).",
         "Worst-case logic (skewed tree) makes operations O(n).",
