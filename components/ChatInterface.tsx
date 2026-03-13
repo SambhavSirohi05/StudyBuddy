@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { ArrowUp, Menu } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { Message } from '@/types';
@@ -16,16 +16,41 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ messages, onSendMessage, isLoading, onToggleSidebar }: ChatInterfaceProps) {
     const [input, setInput] = useState('');
     const bottomRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    // Auto-resize textarea up to max height
+    const adjustTextareaHeight = useCallback(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+        }
+    }, []);
+
+    useEffect(() => {
+        adjustTextareaHeight();
+    }, [input, adjustTextareaHeight]);
+
+    const handleSubmit = (e?: React.FormEvent) => {
+        e?.preventDefault();
         if (input.trim() && !isLoading) {
             onSendMessage(input.trim());
             setInput('');
+            // Reset textarea height after sending
+            if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';
+            }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
         }
     };
 
@@ -93,19 +118,22 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                 {/* Input Area */}
                 <div className="absolute bottom-0 left-0 w-full bg-[#1F1F1F]/80 backdrop-blur-sm pt-2 pb-6 px-4 border-t border-transparent bg-gradient-to-t from-[#1F1F1F] via-[#1F1F1F] to-transparent">
                     <div className="max-w-3xl mx-auto">
-                        <form onSubmit={handleSubmit} className="relative shadow-xl flex items-center border border-white/10 bg-[#2A2A2A] rounded-2xl focus-within:ring-1 focus-within:ring-white/10 focus-within:border-white/10 overflow-hidden ring-1 ring-white/5">
-                            <input
-                                type="text"
+                        <form onSubmit={handleSubmit} className="relative shadow-xl flex items-end border border-white/10 bg-[#2A2A2A] rounded-2xl focus-within:ring-1 focus-within:ring-white/10 focus-within:border-white/10 overflow-hidden ring-1 ring-white/5">
+                            <textarea
+                                ref={textareaRef}
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 placeholder="Send a message..."
-                                className="w-full pl-4 pr-12 py-4 bg-transparent border-none focus:ring-0 text-gray-100 placeholder:text-gray-500 resize-none max-h-[200px] text-base"
+                                className="w-full pl-4 pr-12 py-4 bg-transparent border-none focus:ring-0 text-gray-100 placeholder:text-gray-500 resize-none text-base overflow-y-auto"
+                                style={{ maxHeight: '200px' }}
+                                rows={1}
                                 disabled={isLoading}
                             />
                             <button
                                 type="submit"
                                 disabled={!input.trim() || isLoading}
-                                className={`absolute right-3 p-2 rounded-lg transition-all duration-200 ${input.trim() ? "bg-green-500 text-white" : "bg-transparent text-gray-300"}`}
+                                className={`absolute right-3 bottom-3 p-2 rounded-lg transition-all duration-200 ${input.trim() ? "bg-green-500 text-white" : "bg-transparent text-gray-300"}`}
                             >
                                 <ArrowUp className="w-4 h-4" />
                             </button>
