@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ZoomIn } from 'lucide-react';
+import { X, ZoomIn, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -34,24 +34,39 @@ export default function ImageModal({ isOpen, onClose, imageUrl, children }: Imag
 
     if (!mounted || !isOpen) return null;
 
+    const handleDownload = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!imageUrl) return;
+        const a = document.createElement('a');
+        a.href = imageUrl;
+        a.download = 'studybuddy-diagram.svg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     return createPortal(
         <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
             onClick={onClose}
         >
             <div
-                className="relative max-w-5xl max-h-[90vh] w-full overflow-hidden rounded-lg bg-[#1a1a1a] shadow-2xl border border-white/10"
+                className="relative max-w-5xl max-h-[90vh] w-full overflow-hidden rounded-2xl bg-[#111111] shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300 ease-out"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="absolute top-2 right-2 z-10 flex gap-2">
-                    {/* Add Zoom Indicator for clarity */}
-                    <div className="bg-black/50 text-white/70 px-2 py-1 rounded text-xs flex items-center gap-1">
-                        <ZoomIn className="w-3 h-3" />
-                        <span>Zoomed View</span>
-                    </div>
+                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                    {imageUrl && (
+                        <button
+                            onClick={handleDownload}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/50 text-white hover:bg-white/10 border border-white/10 transition-colors text-sm font-medium backdrop-blur-md"
+                        >
+                            <Download className="w-4 h-4" />
+                            Download SVG
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
-                        className="p-1 rounded-full bg-black/50 text-white hover:bg-white/20 transition-colors"
+                        className="p-1.5 rounded-lg bg-black/50 text-white hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-md"
                     >
                         <X className="w-5 h-5" />
                     </button>

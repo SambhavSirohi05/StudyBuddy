@@ -123,7 +123,7 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                             <button
                                 type="submit"
                                 disabled={!input.trim() || isLoading}
-                                className={`absolute right-3 bottom-3 p-2 rounded-lg transition-all duration-200 ${input.trim() ? "bg-green-500 text-white" : "bg-transparent text-gray-300"}`}
+                                className={`absolute right-3 bottom-3 p-2 rounded-lg transition-all duration-300 active:scale-95 ${input.trim() && !isLoading ? "bg-green-500 hover:bg-green-400 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 text-white" : "bg-transparent text-gray-500"}`}
                             >
                                 <ArrowUp className="w-4 h-4" />
                             </button>
