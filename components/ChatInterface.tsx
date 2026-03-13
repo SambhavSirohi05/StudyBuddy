@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ArrowUp, Menu } from 'lucide-react';
 import ChatMessage from './ChatMessage';
+import ThinkingIndicator from './ThinkingIndicator';
 import { Message } from '@/types';
 import Sidebar from './Sidebar';
 
@@ -95,20 +96,9 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                                 <ChatMessage key={idx} message={msg} />
                             ))}
                             {isLoading && (
-                                <div className="w-full py-2 md:py-4 bg-gray-5 border-b border-black/5">
-                                    <div className="text-base gap-4 md:gap-6 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-4 md:py-6 flex lg:px-0 m-auto">
-                                        <div className="w-8 flex flex-col relative items-end">
-                                            <div className="relative h-7 w-7 rounded-sm flex items-center justify-center text-white flex-shrink-0 bg-green-500">
-                                                <span className="animate-pulse">...</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75 mx-1"></span>
-                                            <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ThinkingIndicator query={
+                                    messages.filter(m => m.role === 'user').pop()?.content as string
+                                } />
                             )}
                             <div ref={bottomRef} />
                         </div>
