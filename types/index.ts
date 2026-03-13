@@ -11,9 +11,16 @@ export interface Subtopic {
   diagrams: Diagram[];
 }
 
+export interface ComparisonTable {
+  title: string;
+  columns: string[];
+  rows: { aspect: string; values: string[] }[];
+}
+
 export interface StudyNotes {
   topic: string;
   subtopics: Subtopic[];
+  comparison_table?: ComparisonTable;
   exam_notes: string[];
   common_mistakes: string[];
   revision_tips: string[];
