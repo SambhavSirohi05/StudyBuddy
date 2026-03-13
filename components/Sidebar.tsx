@@ -60,35 +60,36 @@ export default function Sidebar({
                 </div>
 
                 {/* History List */}
-                <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+                <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
                     {sessions.length === 0 ? (
                         <div className="text-sm text-gray-500 px-3 py-4 text-center">No chats yet</div>
                     ) : (
-                        sessions.map(session => (
-                            <div key={session.id} className="relative group">
-                                <button
-                                    onClick={() => {
-                                        onLoadChat(session.id);
-                                        onClose();
-                                    }}
-                                    className={clsx(
-                                        "flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm text-gray-100 overflow-hidden text-left",
-                                        currentSessionId === session.id ? "bg-white/10" : ""
-                                    )}
-                                >
-                                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                                    <span className="truncate pr-6">{session.title}</span>
-                                </button>
-                                {/* Delete Button (Visible on Hover) */}
-                                <button
-                                    onClick={(e) => onDeleteChat(session.id, e)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    title="Delete chat"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        ))
+                        <>
+                            <SessionGroup 
+                                title="Today" 
+                                items={sessions.filter(s => s.createdAt >= new Date().setHours(0,0,0,0))}
+                                currentSessionId={currentSessionId}
+                                onLoadChat={onLoadChat}
+                                onDeleteChat={onDeleteChat}
+                                onClose={onClose}
+                            />
+                            <SessionGroup 
+                                title="Previous 7 Days" 
+                                items={sessions.filter(s => s.createdAt < new Date().setHours(0,0,0,0) && s.createdAt >= new Date().setHours(0,0,0,0) - 7 * 24 * 60 * 60 * 1000)}
+                                currentSessionId={currentSessionId}
+                                onLoadChat={onLoadChat}
+                                onDeleteChat={onDeleteChat}
+                                onClose={onClose}
+                            />
+                            <SessionGroup 
+                                title="Older" 
+                                items={sessions.filter(s => s.createdAt < new Date().setHours(0,0,0,0) - 7 * 24 * 60 * 60 * 1000)}
+                                currentSessionId={currentSessionId}
+                                onLoadChat={onLoadChat}
+                                onDeleteChat={onDeleteChat}
+                                onClose={onClose}
+                            />
+                        </>
                     )}
                 </div>
 
@@ -103,5 +104,42 @@ export default function Sidebar({
                 </div>
             </div>
         </>
+    );
+}
+
+function SessionGroup({ title, items, currentSessionId, onLoadChat, onDeleteChat, onClose }: any) {
+    if (items.length === 0) return null;
+    
+    return (
+        <div className="space-y-1">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{title}</h3>
+            {items.map((session: ChatSession) => (
+                <div key={session.id} className="relative group">
+                    <button
+                        onClick={() => {
+                            onLoadChat(session.id);
+                            onClose();
+                        }}
+                        className={clsx(
+                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200 text-sm overflow-hidden text-left",
+                            currentSessionId === session.id 
+                                ? "bg-[#2A2A2A] text-white font-medium shadow-sm border border-white/10" 
+                                : "text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent"
+                        )}
+                    >
+                        <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate pr-6">{session.title}</span>
+                    </button>
+                    {/* Delete Button (Visible on Hover) */}
+                    <button
+                        onClick={(e) => onDeleteChat(session.id, e)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete chat"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
     );
 }

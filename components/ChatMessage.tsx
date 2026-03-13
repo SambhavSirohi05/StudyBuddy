@@ -2,7 +2,8 @@
 
 import { Message, StudyNotes } from '@/types';
 import { clsx } from 'clsx';
-import { Bot, User, Copy, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import { Bot, User, Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import DiagramRenderer from './DiagramRenderer';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -52,7 +53,7 @@ function ChatMessageContent({ message }: ChatMessageProps) {
                                 {isNotes ? (
                                     <StudyNotesRenderer notes={message.content as StudyNotes} />
                                 ) : (
-                                    <ReactMarkdown>{message.content as string}</ReactMarkdown>
+                                    <ReactMarkdown components={MarkdownComponents}>{message.content as string}</ReactMarkdown>
                                 )}
 
                                 {/* Footer Icons for Assistant */}
@@ -72,6 +73,60 @@ function ChatMessageContent({ message }: ChatMessageProps) {
     );
 }
 
+// Custom code renderer with syntax highlighting and copy button
+function CodeCopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+    return (
+        <button 
+            onClick={() => {
+                navigator.clipboard.writeText(text);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            }}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+        >
+            {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <span className="text-green-500">Copied!</span> : 'Copy'}
+        </button>
+    );
+}
+
+const MarkdownComponents: any = {
+    code({ node, className, children, ...props }: any) {
+        const match = /language-(\w+)/.exec(className || '');
+        const codeString = String(children).replace(/\n$/, '');
+        
+        // Block code (has language match or contains newlines)
+        if (match || codeString.includes('\n')) {
+            const lang = match ? match[1] : 'text';
+            return (
+                <div className="relative group rounded-md overflow-hidden bg-[#282C34] my-5 border border-white/10 shadow-sm">
+                    <div className="flex bg-black/40 text-xs text-gray-400 px-4 py-2 justify-between items-center border-b border-white/5">
+                        <span className="uppercase tracking-wider font-semibold">{lang}</span>
+                        <CodeCopyButton text={codeString} />
+                    </div>
+                    <SyntaxHighlighter
+                        style={oneDark}
+                        language={lang}
+                        PreTag="div"
+                        customStyle={{ margin: 0, background: 'transparent', padding: '1rem', fontSize: '0.875rem' }}
+                        {...props}
+                    >
+                        {codeString}
+                    </SyntaxHighlighter>
+                </div>
+            );
+        }
+        
+        // Inline code
+        return (
+            <code className="bg-white/10 px-1.5 py-0.5 rounded text-[#E2E8F0] font-mono text-sm" {...props}>
+                {children}
+            </code>
+        );
+    }
+};
+
 // Inline Renderer for the StudyNotes object
 function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
     if (!notes) return <div className="text-red-500">Error: No notes data available.</div>;
@@ -81,7 +136,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
             {/* Conversational Mode */}
             {notes.is_conversational && notes.conversational_response ? (
                 <div className="prose prose-slate dark:prose-invert max-w-none">
-                    <ReactMarkdown>{notes.conversational_response}</ReactMarkdown>
+                    <ReactMarkdown components={MarkdownComponents}>{notes.conversational_response}</ReactMarkdown>
                 </div>
             ) : (
                 <>
@@ -92,19 +147,19 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                     </div>
 
                     {/* Subtopics with Inline Diagrams */}
-                    <div className="space-y-10">
+                    <div className="space-y-8">
                         {notes.subtopics?.length > 0 ? notes.subtopics.map((subtopic, idx) => (
-                            <div key={idx} className="group">
+                            <div key={idx} className="group p-5 -mx-5 rounded-2xl hover:bg-white/[0.02] transition-colors duration-300">
                                 <h2 className="text-xl font-semibold mb-3 text-gray-100">{subtopic.title}</h2>
 
                                 {/* Text Explanation */}
-                                <div className="mb-6 leading-relaxed">
-                                    <ReactMarkdown>{subtopic.explanation}</ReactMarkdown>
+                                <div className="mb-6 leading-relaxed text-gray-300">
+                                    <ReactMarkdown components={MarkdownComponents}>{subtopic.explanation}</ReactMarkdown>
                                 </div>
 
                                 {/* Diagrams */}
                                 {subtopic.diagrams?.map((diagram, dIdx) => (
-                                    <div key={dIdx} className="my-6 bg-[#1F1F1F] border border-white/10 rounded-md p-2 shadow-sm">
+                                    <div key={dIdx} className="my-6 bg-[#1F1F1F] border border-white/10 rounded-xl p-2 shadow-sm hover:border-white/20 hover:shadow-lg hover:shadow-black/50 transition-all duration-300">
                                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2 pt-2">
                                             {diagram.diagram_title}
                                         </div>
@@ -140,7 +195,7 @@ function StudyNotesRenderer({ notes }: { notes: StudyNotes }) {
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {notes.comparison_table.rows.map((row, rIdx) => (
-                                        <tr key={rIdx} className="hover:bg-white/[0.02] transition-colors">
+                                        <tr key={rIdx} className="hover:bg-white/[0.04] transition-colors duration-200">
                                             <td className="py-4 px-2 font-semibold text-gray-100 align-top">{row.aspect}</td>
                                             {row.values.map((val, vIdx) => (
                                                 <td key={vIdx} className="py-4 px-2 text-gray-300 leading-relaxed align-top">{val}</td>
