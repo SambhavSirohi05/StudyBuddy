@@ -181,9 +181,6 @@ export default function ChatInterface({
                                 <ArrowUp className="w-4 h-4" />
                             </button>
                         </form>
-                        <div className={`text-center mt-2.5 text-xs hidden md:block ${isDarkMode ? 'text-[#a3a3a3]' : 'text-gray-400'}`}>
-                            Study Buddy Research Preview. Use generated notes for review.
-                        </div>
                     </div>
                 </div>
 
