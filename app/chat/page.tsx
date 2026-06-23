@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import Sidebar from '@/components/Sidebar';
 import { generateStudyNotesAction } from '@/lib/ai-handler';
@@ -11,18 +11,40 @@ export default function ChatPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(true);
+    const isMounted = useRef(false);
 
-    // Sync theme with localStorage
+    // Sync theme with localStorage and body classes
     useEffect(() => {
+        // Temporarily disable transitions on mount to prevent flash
+        document.body.classList.add('no-transitions');
+        
         const storedTheme = localStorage.getItem('studybuddy-theme');
-        if (storedTheme === 'light') {
-            setIsDarkMode(false);
+        const isDark = storedTheme !== 'light';
+        setIsDarkMode(isDark);
+        
+        if (isDark) {
+            document.body.classList.add('c1-dark-body');
+            document.body.classList.remove('c1-light-body');
         } else {
-            setIsDarkMode(true);
+            document.body.classList.add('c1-light-body');
+            document.body.classList.remove('c1-dark-body');
         }
+        
+        const reflow = document.body.offsetHeight;
+        const timer = setTimeout(() => {
+            document.body.classList.remove('no-transitions');
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, []);
 
+    // Sync body class when theme toggle is clicked manually
     useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
         if (isDarkMode) {
             localStorage.setItem('studybuddy-theme', 'dark');
             document.body.classList.add('c1-dark-body');
