@@ -17,6 +17,22 @@ function sanitizeMermaidCode(code: string): string {
          .replace(/&lt;/g, '<')
          .replace(/&amp;/g, '&');
 
+    // 0.5. Fix subgraph titles with quotes: subgraph "Typical Tree" → subgraph Typical_Tree ["Typical Tree"]
+    s = s.replace(/^(\s*)subgraph\s+"([^"]+)"/gm, (match, indent, title) => {
+        const safeId = title.replace(/[^a-zA-Z0-9]/g, '_');
+        return `${indent}subgraph ${safeId} ["${title}"]`;
+    });
+
+    // 0.6. Fix subgraph titles with spaces but no quotes: subgraph Typical Tree → subgraph Typical_Tree ["Typical Tree"]
+    s = s.replace(/^(\s*)subgraph\s+([a-zA-Z0-9_\s()\-]+)$/gm, (match, indent, title) => {
+        const trimmed = title.trim();
+        if (trimmed.includes(' ') && !trimmed.startsWith('"') && !trimmed.startsWith('[')) {
+            const safeId = trimmed.replace(/[^a-zA-Z0-9]/g, '_');
+            return `${indent}subgraph ${safeId} ["${trimmed}"]`;
+        }
+        return match;
+    });
+
     // 1. Strip tilde generics: List~Book~ → List
     s = s.replace(/~[^~\n]+~/g, '');
 
@@ -111,6 +127,7 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
     }, []);
 
     useEffect(() => {
+        let isMounted = true;
         const renderDiagram = async () => {
             if (type !== 'mermaid' || !containerRef.current) return;
 
@@ -120,11 +137,13 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
 
             try {
                 const { svg } = await mermaid.render(svgId, sanitized);
+                if (!isMounted) return;
                 setSvg(svg);
                 setError(null);
                 const blob = new Blob([svg], { type: 'image/svg+xml' });
                 setSvgDataUrl(URL.createObjectURL(blob));
             } catch (err) {
+                if (!isMounted) return;
                 console.error('Mermaid render failed:', err);
                 console.error('Sanitized code that failed:\n', sanitized);
                 const tempId = `d${svgId}`;
@@ -137,6 +156,7 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
         renderDiagram();
 
         return () => {
+            isMounted = false;
             if (svgDataUrl) URL.revokeObjectURL(svgDataUrl);
             const svgId = `mermaid-svg-${id}`;
             const el = document.getElementById(`d${svgId}`) || document.getElementById(svgId);
