@@ -11,6 +11,7 @@ interface DiagramRendererProps {
 
 function sanitizeMermaidCode(code: string): string {
     let s = code.trim();
+    const isClassDiagram = s.includes('classDiagram');
 
     // 0. Decode common HTML entities: &gt; → >, &lt; → <, &amp; → &
     s = s.replace(/&gt;/g, '>')
@@ -39,11 +40,27 @@ function sanitizeMermaidCode(code: string): string {
     // 2. Strip angle bracket generics: List<Book> → List
     s = s.replace(/<[^>\n]+>/g, '');
 
-    // 3. Strip colon-style param types inside parens: (book: Book) → (book)
+    // 3. Clean parameter lists inside parens to contain only types: (Book book) → (Book), (Member member, BookItem bookItem) → (Member, BookItem)
     s = s.replace(/\(([^)]*)\)/g, (match, inner) => {
         const cleaned = inner
             .split(',')
-            .map((p: string) => p.trim().replace(/:\s*\w+/g, '').trim())
+            .map((p: string) => {
+                const trimmed = p.trim();
+                // Remove colon-style: (book: Book) -> (Book)
+                let cleanedParam = trimmed.replace(/^\w+\s*:\s*/, '').trim();
+                // Handle space-style: (Book book) -> (Book)
+                if (cleanedParam.includes(' ')) {
+                    const parts = cleanedParam.split(/\s+/);
+                    if (parts[0][0] === parts[0][0].toUpperCase() || ['string', 'number', 'boolean', 'void'].includes(parts[0])) {
+                        cleanedParam = parts[0];
+                    } else if (parts[1][0] === parts[1][0].toUpperCase() || ['string', 'number', 'boolean', 'void'].includes(parts[1])) {
+                        cleanedParam = parts[1];
+                    } else {
+                        cleanedParam = parts[0];
+                    }
+                }
+                return cleanedParam;
+            })
             .filter(Boolean)
             .join(', ');
         return `(${cleaned})`;
@@ -58,15 +75,22 @@ function sanitizeMermaidCode(code: string): string {
     // 6. Strip > and < from inside quoted relationship labels
     s = s.replace(/:\s*"([^"]+)"/g, (_, label) => `: "${label.replace(/[<>]/g, '').trim()}"`);
 
-    // 7. Normalize range multiplicities: "0..*" → * , "1..*" → * , "0..1" → 1
-    s = s.replace(/"(\d+)\.\.\*"/g, '*');
-    s = s.replace(/"(\d+)\.\.(\d+)"/g, '$2');
+    // 7. Normalize range multiplicities: "0..*" → * , "0..1" → 1 (keeps quotes for classDiagram)
+    if (isClassDiagram) {
+        s = s.replace(/"(\d+)\.\.\*"/g, '"*"');
+        s = s.replace(/"(\d+)\.\.(\d+)"/g, '"$2"');
+    } else {
+        s = s.replace(/"(\d+)\.\.\*"/g, '*');
+        s = s.replace(/"(\d+)\.\.(\d+)"/g, '$2');
+    }
 
-    // 8. Strip quotes from simple multiplicities: "1" -- "*" → 1 -- *
-    s = s.replace(
-        /"([\d\*]+)"\s*(--|\.\.>|\*--|--o|--\*|<\|--|--\|>|\*--\*)\s*"([\d\*]+)"/g,
-        '$1 $2 $3'
-    );
+    // 8. Strip quotes from simple multiplicities only if NOT a class diagram
+    if (!isClassDiagram) {
+        s = s.replace(
+            /"([\d\*]+)"\s*(--|\.\.>|\*--|--o|--\*|<\|--|--\|>|\*--\*)\s*"([\d\*]+)"/g,
+            '$1 $2 $3'
+        );
+    }
 
     // 9. Fix bare .. → ..>
     s = s.replace(/^(\s*[\w"'.]+\s*)(\.\.)(\s*[\w"'.]+)/gm, '$1..>$3');
