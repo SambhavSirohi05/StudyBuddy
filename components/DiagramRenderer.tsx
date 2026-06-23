@@ -12,6 +12,11 @@ interface DiagramRendererProps {
 function sanitizeMermaidCode(code: string): string {
     let s = code.trim();
 
+    // 0. Decode common HTML entities: &gt; → >, &lt; → <, &amp; → &
+    s = s.replace(/&gt;/g, '>')
+         .replace(/&lt;/g, '<')
+         .replace(/&amp;/g, '&');
+
     // 1. Strip tilde generics: List~Book~ → List
     s = s.replace(/~[^~\n]+~/g, '');
 
