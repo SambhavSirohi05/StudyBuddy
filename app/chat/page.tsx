@@ -58,7 +58,7 @@ export default function ChatPage() {
     };
 
     return (
-        <main className="flex h-screen bg-white overflow-hidden">
+        <main className="flex h-screen bg-white dark:bg-[#0D0D0D] overflow-hidden transition-colors duration-300">
             {/* Desktop Sidebar (Always Visible) */}
             <div className="hidden md:block h-full">
                 <Sidebar

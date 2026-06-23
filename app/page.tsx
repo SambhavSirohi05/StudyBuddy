@@ -6,12 +6,23 @@ import Link from 'next/link';
 export default function LandingPage() {
     const [isDarkMode, setIsDarkMode] = useState(true);
 
+    useEffect(() => {
+        const storedTheme = localStorage.getItem('studybuddy-theme');
+        if (storedTheme === 'light') {
+            setIsDarkMode(false);
+        } else {
+            setIsDarkMode(true);
+        }
+    }, []);
+
     // Sync body class for background transitions
     useEffect(() => {
         if (isDarkMode) {
+            localStorage.setItem('studybuddy-theme', 'dark');
             document.body.classList.add('c1-dark-body');
             document.body.classList.remove('c1-light-body');
         } else {
+            localStorage.setItem('studybuddy-theme', 'light');
             document.body.classList.add('c1-light-body');
             document.body.classList.remove('c1-dark-body');
         }
