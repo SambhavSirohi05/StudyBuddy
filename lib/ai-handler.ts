@@ -60,6 +60,9 @@ CRITICAL RULES FOR MERMAID DIAGRAMS:
 5. Use simple alphanumeric node IDs (A, B, C1, node1, etc). Do NOT use special characters in node IDs.
 6. Use --> for arrows, --- for lines, -.-> for dotted arrows.
 7. Ensure the syntax is strictly valid mermaid.js. Test mentally before outputting.
+8. For Class Diagrams (classDiagram):
+   - Member methods MUST follow the format: '+methodName(paramType paramName) returnType' (e.g., '+addAuthor(Author author) void' or '+getDueDate() Date'). NEVER put the return type before the method name (e.g. do NOT write '+void addAuthor(Author author)').
+   - Relationship labels containing spaces or special characters (like '>') must be wrapped in double quotes (e.g., Book "1" -- "*" BookItem : "has >").
 CRITICAL: Return ONLY the JSON object. Do not wrap it in markdown code blocks.
 `;
 

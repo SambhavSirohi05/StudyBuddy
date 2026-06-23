@@ -107,6 +107,16 @@ export function useChatStore() {
         return targetId;
     };
 
+    const clearAllChats = () => {
+        setSessions([]);
+        setCurrentSessionId(null);
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+            console.error("Failed to clear localStorage:", e);
+        }
+    };
+
     const currentMessages = sessions.find(s => s.id === currentSessionId)?.messages || [];
 
     return {
@@ -117,6 +127,7 @@ export function useChatStore() {
         createNewChat,
         loadChat,
         deleteChat,
-        addMessageToCurrent
+        addMessageToCurrent,
+        clearAllChats
     };
 }

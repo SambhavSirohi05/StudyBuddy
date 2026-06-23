@@ -1,72 +1,90 @@
 'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
 import ImageModal from './ImageModal';
 
 interface DiagramRendererProps {
     code: string;
-    id: string; // Unique ID for the diagram
+    id: string;
     type: string;
 }
 
-/**
- * Sanitize AI-generated Mermaid code to fix common syntax issues.
- * - Ensures node labels containing special characters are properly quoted.
- * - Removes problematic characters that break the parser.
- */
 function sanitizeMermaidCode(code: string): string {
-    let sanitized = code.trim();
+    let s = code.trim();
 
-    // Fix subgraph labels with special characters
-    // e.g. "subgraph Sender (Encapsulation)" -> "subgraph sender_encapsulation ["Sender (Encapsulation)"]"
-    sanitized = sanitized.replace(
-        /^(\s*subgraph\s+)(.+)$/gm,
+    // 1. Strip tilde generics: List~Book~ → List
+    s = s.replace(/~[^~\n]+~/g, '');
+
+    // 2. Strip angle bracket generics: List<Book> → List
+    s = s.replace(/<[^>\n]+>/g, '');
+
+    // 3. Strip colon-style param types inside parens: (book: Book) → (book)
+    s = s.replace(/\(([^)]*)\)/g, (match, inner) => {
+        const cleaned = inner
+            .split(',')
+            .map((p: string) => p.trim().replace(/:\s*\w+/g, '').trim())
+            .filter(Boolean)
+            .join(', ');
+        return `(${cleaned})`;
+    });
+
+    // 4. Strip colon before return type: method() : boolean → method() boolean
+    s = s.replace(/(\([^)]*\))\s*:\s*(\w+)/g, '$1 $2');
+
+    // 5. Strip colon-style field types: -name: String → -name String
+    s = s.replace(/^(\s*[+\-#~]\w+)\s*:\s*(\w+)(\s*)$/gm, '$1 $2$3');
+
+    // 6. Strip > and < from inside quoted relationship labels
+    s = s.replace(/:\s*"([^"]+)"/g, (_, label) => `: "${label.replace(/[<>]/g, '').trim()}"`);
+
+    // 7. Normalize range multiplicities: "0..*" → * , "1..*" → * , "0..1" → 1
+    s = s.replace(/"(\d+)\.\.\*"/g, '*');
+    s = s.replace(/"(\d+)\.\.(\d+)"/g, '$2');
+
+    // 8. Strip quotes from simple multiplicities: "1" -- "*" → 1 -- *
+    s = s.replace(
+        /"([\d\*]+)"\s*(--|\.\.>|\*--|--o|--\*|<\|--|--\|>|\*--\*)\s*"([\d\*]+)"/g,
+        '$1 $2 $3'
+    );
+
+    // 9. Fix bare .. → ..>
+    s = s.replace(/^(\s*[\w"'.]+\s*)(\.\.)(\s*[\w"'.]+)/gm, '$1..>$3');
+
+    // 10. Reorder Java/TS style return types: +void method() → +method() void
+    s = s.replace(
+        /^(\s*)([+\-#~])(\w+)\s+(\w+)\(([^)]*)\)/gm,
+        (match, indent, vis, returnType, methodName, params) => {
+            const lower = returnType.toLowerCase();
+            if (['class', 'interface', 'subgraph', 'enum'].includes(lower)) return match;
+            return `${indent}${vis}${methodName}(${params}) ${returnType}`;
+        }
+    );
+
+    // 11. Quote unquoted relationship labels with special chars
+    s = s.replace(
+        /^(\s*[\w"'.\-\*]+[^\n:]+:\s*)([^\n"]+)$/gm,
         (match, prefix, label) => {
-            const trimmedLabel = label.trim();
-            // Already has bracket syntax like: subgraph id ["Label"]
-            if (/\[.*\]/.test(trimmedLabel)) return match;
-            // If label contains special characters, use the bracket syntax
-            if (/[(){}[\]<>|&]/.test(trimmedLabel)) {
-                // Create a safe ID from the label
-                const safeId = trimmedLabel.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
-                return `${prefix}${safeId} ["${trimmedLabel.replace(/"/g, '#quot;')}"]`;
+            const trimmed = label.trim();
+            if (/[^a-zA-Z0-9_]/.test(trimmed) && !trimmed.startsWith('"')) {
+                return `${prefix}"${trimmed.replace(/"/g, '#quot;')}"`;
             }
             return match;
         }
     );
 
-    // Fix node definitions like A[Label (with parens)] -> A["Label (with parens)"]
-    // Only quote if the label isn't already quoted
-    sanitized = sanitized.replace(
-        /(\b\w+)\[([^\]"]+)\]/g,
-        (match, nodeId, label) => {
-            // Skip subgraph lines (already handled above)
-            if (nodeId === 'subgraph') return match;
-            // If label contains special characters that break mermaid, wrap in quotes
-            if (/[(){}[\]<>|&]/.test(label)) {
-                return `${nodeId}["${label.replace(/"/g, '#quot;')}"]`;
-            }
-            return match;
+    // 12. Quote flowchart node labels with special chars: A[Label (x)] → A["Label (x)"]
+    s = s.replace(/(\b\w+)\[([^\]"]+)\]/g, (match, nodeId, label) => {
+        if (nodeId === 'subgraph') return match;
+        if (/[(){}[\]<>|&]/.test(label)) {
+            return `${nodeId}["${label.replace(/"/g, '#quot;')}"]`;
         }
-    );
+        return match;
+    });
 
-    // Fix (round) node definitions: A(Label (x)) -> A("Label (x)")
-    sanitized = sanitized.replace(
-        /(\b\w+)\(([^)"]+)\)/g,
-        (match, nodeId, label) => {
-            if (nodeId === 'subgraph') return match;
-            if (/[(){}[\]<>|&]/.test(label)) {
-                return `${nodeId}("${label.replace(/"/g, '#quot;')}")`;
-            }
-            return match;
-        }
-    );
+    // 13. Collapse excess blank lines
+    s = s.replace(/\n{3,}/g, '\n\n');
 
-    // Remove any completely empty lines between nodes that could cause issues
-    sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
-
-    return sanitized;
+    return s;
 }
 
 export default function DiagramRenderer({ code, id, type }: DiagramRendererProps) {
@@ -81,8 +99,10 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
             startOnLoad: false,
             theme: 'neutral',
             securityLevel: 'loose',
-            fontFamily: 'inherit'
-        });
+            fontFamily: 'inherit',
+            suppressUncaughtErrors: true,
+        } as any);
+        mermaid.parseError = () => {};
     }, []);
 
     useEffect(() => {
@@ -90,35 +110,32 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
             if (type !== 'mermaid' || !containerRef.current) return;
 
             const svgId = `mermaid-svg-${id}`;
+            const sanitized = sanitizeMermaidCode(code);
+            console.log('[Mermaid sanitized]', sanitized);
 
-            // Try rendering original code first, then sanitized version
-            const attempts = [code, sanitizeMermaidCode(code)];
-
-            for (const attempt of attempts) {
-                try {
-                    const { svg } = await mermaid.render(svgId, attempt);
-                    setSvg(svg);
-                    setError(null);
-
-                    const blob = new Blob([svg], { type: 'image/svg+xml' });
-                    const url = URL.createObjectURL(blob);
-                    setSvgDataUrl(url);
-                    return; // Success — stop trying
-                } catch (err) {
-                    console.warn('Mermaid render attempt failed:', err);
-                    // Continue to next attempt
-                }
+            try {
+                const { svg } = await mermaid.render(svgId, sanitized);
+                setSvg(svg);
+                setError(null);
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                setSvgDataUrl(URL.createObjectURL(blob));
+            } catch (err) {
+                console.error('Mermaid render failed:', err);
+                console.error('Sanitized code that failed:\n', sanitized);
+                const tempId = `d${svgId}`;
+                const el = document.getElementById(tempId) || document.getElementById(svgId);
+                if (el) el.remove();
+                setError('Diagram syntax error — showing raw code below.');
             }
-
-            // Both attempts failed — show graceful fallback
-            console.error('Mermaid rendering failed for all attempts');
-            setError('Diagram syntax error — showing raw code below.');
         };
 
         renderDiagram();
 
         return () => {
             if (svgDataUrl) URL.revokeObjectURL(svgDataUrl);
+            const svgId = `mermaid-svg-${id}`;
+            const el = document.getElementById(`d${svgId}`) || document.getElementById(svgId);
+            if (el) el.remove();
         };
     }, [code, id, type]);
 
@@ -146,11 +163,10 @@ export default function DiagramRenderer({ code, id, type }: DiagramRendererProps
                     />
                 )}
             </div>
-
             <ImageModal
                 isOpen={isZoomed}
                 onClose={() => setIsZoomed(false)}
-                imageUrl={svgDataUrl} // Pass the SVG blob URL
+                imageUrl={svgDataUrl}
             />
         </>
     );

@@ -10,6 +10,7 @@ interface SidebarProps {
     onNewChat: () => void;
     onLoadChat: (id: string) => void;
     onDeleteChat: (id: string, e: React.MouseEvent) => void;
+    onClearAllChats: () => void;
     isOpen: boolean;        // For mobile drawer state
     onClose: () => void;    // To close drawer on mobile
 }
@@ -20,6 +21,7 @@ export default function Sidebar({
     onNewChat,
     onLoadChat,
     onDeleteChat,
+    onClearAllChats,
     isOpen,
     onClose
 }: SidebarProps) {
@@ -94,13 +96,25 @@ export default function Sidebar({
                 </div>
 
                 {/* User Footer */}
-                <div className="p-3 border-t border-white/10">
-                    <button className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm text-white">
+                <div className="p-3 border-t border-white/10 space-y-1">
+                    <button
+                        onClick={() => {
+                            if (window.confirm("Are you sure you want to clear all chat history?")) {
+                                onClearAllChats();
+                                onClose();
+                            }
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors text-sm text-left"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Clear all chats</span>
+                    </button>
+                    <div className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-white">
                         <div className="w-8 h-8 rounded bg-green-600 flex items-center justify-center text-white font-bold">
                             U
                         </div>
-                        <div className="flex-1 text-left font-medium">Study User</div>
-                    </button>
+                        <div className="flex-1 text-left font-medium select-none">Study User</div>
+                    </div>
                 </div>
             </div>
         </>
