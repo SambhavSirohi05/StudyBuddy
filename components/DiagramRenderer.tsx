@@ -34,6 +34,19 @@ function sanitizeMermaidCode(code: string): string {
         return match;
     });
 
+    // 0.7. Translate pseudo-usecase keywords (actor, rectangle) to valid flowchart elements
+    // actor A["Customer"] → A["Customer"]
+    s = s.replace(/\bactor\s+(\w+)/g, '$1');
+
+    // rectangle "System" { → subgraph "System"
+    s = s.replace(/\brectangle\s+("([^"]+)"|([^"{]+))\s*\{/g, (match, p1, p2, p3) => {
+        const title = p2 || p3;
+        return `subgraph "${title.trim()}"`;
+    });
+
+    // Close block: } → end (preserve indentation)
+    s = s.replace(/^(\s*)\}\s*$/gm, '$1end');
+
     // 1. Strip tilde generics: List~Book~ → List
     s = s.replace(/~[^~\n]+~/g, '');
 
