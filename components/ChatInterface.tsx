@@ -155,8 +155,12 @@ export default function ChatInterface({
                 </div>
 
                 {/* Input Area */}
-                <div className={`absolute bottom-0 left-0 w-full pt-4 pb-6 px-4 bg-gradient-to-t border-t border-transparent sync-theme-transition ${isDarkMode ? 'from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent' : 'from-[#ffffff] via-[#ffffff]/95 to-transparent'}`}>
-                    <div className="max-w-3xl mx-auto">
+                <div className="absolute bottom-0 left-0 w-full pt-4 pb-6 px-4 border-t border-transparent pointer-events-none z-10">
+                    {/* Smooth fading gradient background overlays */}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent sync-theme-transition ${isDarkMode ? 'opacity-100' : 'opacity-0'}`} />
+                    <div className={`absolute inset-0 bg-gradient-to-t from-[#ffffff] via-[#ffffff]/95 to-transparent sync-theme-transition ${isDarkMode ? 'opacity-0' : 'opacity-100'}`} />
+                    
+                    <div className="max-w-3xl mx-auto relative z-10 pointer-events-auto">
                         <form 
                             onSubmit={handleSubmit} 
                             className={`relative shadow-xl flex items-end border rounded-2xl overflow-hidden ring-1 sync-theme-transition ${isDarkMode ? 'border-zinc-900 bg-[#141414] ring-white/5 focus-within:ring-white/10' : 'border-gray-200 bg-[#F4F8F9] ring-black/5 focus-within:ring-black/10'}`}
