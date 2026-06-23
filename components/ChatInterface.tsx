@@ -63,14 +63,14 @@ export default function ChatInterface({
     };
 
     return (
-        <div className={`flex flex-col flex-1 h-full overflow-hidden font-sans transition-colors duration-300 ${isDarkMode ? 'bg-[#0D0D0D] text-[#F0EDE8]' : 'bg-[#ffffff] text-[#0f172a]'}`}>
+        <div className={`flex flex-col flex-1 h-full overflow-hidden font-sans sync-theme-transition ${isDarkMode ? 'bg-[#0D0D0D] text-[#F0EDE8]' : 'bg-[#ffffff] text-[#0f172a]'}`}>
             
             {/* Unified Top Header Bar */}
-            <header className={`flex items-center justify-between px-4 py-3 border-b sticky top-0 z-30 transition-colors duration-300 ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-900' : 'bg-[#ffffff] border-gray-100'}`}>
+            <header className={`flex items-center justify-between px-4 py-3 border-b sticky top-0 z-30 sync-theme-transition ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-900' : 'bg-[#ffffff] border-gray-100'}`}>
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar} 
-                        className={`p-2 md:hidden rounded-lg transition-colors ${isDarkMode ? 'hover:bg-zinc-800 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+                        className={`p-2 md:hidden rounded-lg sync-theme-transition ${isDarkMode ? 'hover:bg-zinc-800 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-600'}`}
                         aria-label="Toggle Sidebar"
                     >
                         <Menu className="w-5 h-5" />
@@ -116,7 +116,7 @@ export default function ChatInterface({
                 <div className="flex-1 overflow-y-auto w-full scroll-smooth">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full px-4">
-                            <div className={`p-4 rounded-full mb-4 shadow-sm border ${isDarkMode ? 'bg-[#141414] border-zinc-800' : 'bg-[#F4F8F9] border-gray-100'}`}>
+                            <div className={`p-4 rounded-full mb-4 shadow-sm border sync-theme-transition ${isDarkMode ? 'bg-[#141414] border-zinc-800' : 'bg-[#F4F8F9] border-gray-100'}`}>
                                 <span className="text-4xl">🎓</span>
                             </div>
                             <h2 className="text-2xl font-semibold mb-2">Study Buddy Agent</h2>
@@ -125,14 +125,14 @@ export default function ChatInterface({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
                                 <button 
                                     onClick={() => setInput("Explain Binary Search Tree")} 
-                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
+                                    className={`p-4 border rounded-xl text-left text-sm sync-theme-transition ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
                                 >
                                     "Explain Binary Search Tree"
                                     <div className="text-xs text-gray-400 mt-1">Visually explained</div>
                                 </button>
                                 <button 
                                     onClick={() => setInput("Quick Sort Algorithm")} 
-                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
+                                    className={`p-4 border rounded-xl text-left text-sm sync-theme-transition ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
                                 >
                                     "Quick Sort Algorithm"
                                     <div className="text-xs text-gray-400 mt-1">With flowcharts</div>
@@ -155,11 +155,11 @@ export default function ChatInterface({
                 </div>
 
                 {/* Input Area */}
-                <div className={`absolute bottom-0 left-0 w-full pt-4 pb-6 px-4 bg-gradient-to-t border-t border-transparent ${isDarkMode ? 'from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent' : 'from-[#ffffff] via-[#ffffff]/95 to-transparent'}`}>
+                <div className={`absolute bottom-0 left-0 w-full pt-4 pb-6 px-4 bg-gradient-to-t border-t border-transparent sync-theme-transition ${isDarkMode ? 'from-[#0D0D0D] via-[#0D0D0D]/95 to-transparent' : 'from-[#ffffff] via-[#ffffff]/95 to-transparent'}`}>
                     <div className="max-w-3xl mx-auto">
                         <form 
                             onSubmit={handleSubmit} 
-                            className={`relative shadow-xl flex items-end border rounded-2xl overflow-hidden ring-1 transition-all duration-300 ${isDarkMode ? 'border-zinc-900 bg-[#141414] ring-white/5 focus-within:ring-white/10' : 'border-gray-200 bg-[#F4F8F9] ring-black/5 focus-within:ring-black/10'}`}
+                            className={`relative shadow-xl flex items-end border rounded-2xl overflow-hidden ring-1 sync-theme-transition ${isDarkMode ? 'border-zinc-900 bg-[#141414] ring-white/5 focus-within:ring-white/10' : 'border-gray-200 bg-[#F4F8F9] ring-black/5 focus-within:ring-black/10'}`}
                         >
                             <textarea
                                 ref={textareaRef}

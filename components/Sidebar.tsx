@@ -39,7 +39,7 @@ export default function Sidebar({
 
             {/* Sidebar Container */}
             <div className={clsx(
-                "fixed inset-y-0 left-0 index-50 w-[260px] h-full flex flex-col transition-transform duration-300 md:relative md:translate-x-0 z-50 border-r transition-colors",
+                "fixed inset-y-0 left-0 index-50 w-[260px] h-full flex flex-col md:relative md:translate-x-0 z-50 border-r sidebar-transition",
                 isOpen ? "translate-x-0" : "-translate-x-full",
                 isDarkMode 
                     ? "bg-[#0D0D0D] border-zinc-900 text-[#F0EDE8]" 
@@ -49,14 +49,14 @@ export default function Sidebar({
                 <div className="md:hidden p-4 flex justify-end">
                     <button 
                         onClick={onClose} 
-                        className={`p-1 rounded transition-colors ${isDarkMode ? 'hover:bg-zinc-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                        className={`p-1 rounded sync-theme-transition ${isDarkMode ? 'hover:bg-zinc-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Brand Header Logo (Above New Chat Button) */}
-                <div className={`px-4 py-4.5 border-b flex items-center justify-between transition-colors ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
+                <div className={`px-4 py-4.5 border-b flex items-center justify-between sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
                     <div className="c1-logo select-none text-[1.8rem]">
                         StudyBuddy<span className="c1-logo-dot">.</span>
                     </div>
@@ -69,7 +69,7 @@ export default function Sidebar({
                             onNewChat();
                             onClose(); // Close on mobile after selection
                         }}
-                        className={`flex items-center gap-2 w-full px-3 py-3 rounded-lg border transition-colors text-sm font-medium text-left ${isDarkMode ? 'border-zinc-800 hover:bg-zinc-800/50 text-white' : 'border-gray-200 hover:bg-gray-50 text-gray-800'}`}
+                        className={`flex items-center gap-2 w-full px-3 py-3 rounded-lg border sync-theme-transition text-sm font-medium text-left ${isDarkMode ? 'border-zinc-800 hover:bg-zinc-800/50 text-white' : 'border-gray-200 hover:bg-gray-50 text-gray-800'}`}
                     >
                         <Plus className="w-4 h-4" />
                         New chat
@@ -114,7 +114,7 @@ export default function Sidebar({
                 </div>
 
                 {/* User Footer */}
-                <div className={`p-3 border-t space-y-1 transition-colors ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
+                <div className={`p-3 border-t space-y-1 sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
                     <button
                         onClick={() => {
                             if (window.confirm("Are you sure you want to clear all chat history?")) {
@@ -122,7 +122,7 @@ export default function Sidebar({
                                 onClose();
                             }
                         }}
-                        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-colors text-sm text-left ${isDarkMode ? 'hover:bg-red-500/10 text-zinc-400 hover:text-red-400' : 'hover:bg-red-500/5 text-gray-500 hover:text-red-500'}`}
+                        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg sync-theme-transition text-sm text-left ${isDarkMode ? 'hover:bg-red-500/10 text-zinc-400 hover:text-red-400' : 'hover:bg-red-500/5 text-gray-500 hover:text-red-500'}`}
                     >
                         <Trash2 className="w-4 h-4" />
                         <span>Clear all chats</span>
@@ -153,7 +153,7 @@ function SessionGroup({ title, items, currentSessionId, onLoadChat, onDeleteChat
                             onClose();
                         }}
                         className={clsx(
-                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200 text-sm overflow-hidden text-left",
+                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg sync-theme-transition text-sm overflow-hidden text-left",
                             currentSessionId === session.id 
                                 ? (isDarkMode 
                                     ? "bg-zinc-900 text-white font-medium border border-white/5" 
