@@ -1,22 +1,44 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
     const [isDarkMode, setIsDarkMode] = useState(true);
+    const isMounted = useRef(false);
 
+    // Sync theme with localStorage and body classes
     useEffect(() => {
+        // Temporarily disable transitions on mount to prevent flash
+        document.body.classList.add('no-transitions');
+        
         const storedTheme = localStorage.getItem('studybuddy-theme');
-        if (storedTheme === 'light') {
-            setIsDarkMode(false);
+        const isDark = storedTheme !== 'light';
+        setIsDarkMode(isDark);
+        
+        if (isDark) {
+            document.body.classList.add('c1-dark-body');
+            document.body.classList.remove('c1-light-body');
         } else {
-            setIsDarkMode(true);
+            document.body.classList.add('c1-light-body');
+            document.body.classList.remove('c1-dark-body');
         }
+        
+        const reflow = document.body.offsetHeight;
+        const timer = setTimeout(() => {
+            document.body.classList.remove('no-transitions');
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, []);
 
-    // Sync body class for background transitions
+    // Sync body class when theme toggle is clicked manually
     useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
         if (isDarkMode) {
             localStorage.setItem('studybuddy-theme', 'dark');
             document.body.classList.add('c1-dark-body');
@@ -69,11 +91,11 @@ export default function LandingPage() {
 
                 {/* Header block */}
                 <div className="c1-header">
-                    <span className="c1-badge">Core Features</span>
-                    <h1 className="c1-title">Built for Speed & Retention</h1>
+                    <span className="c1-badge">AI Visual Study Companion</span>
+                    <h1 className="c1-title">Visualize Your Learning</h1>
                     <p className="c1-subtitle">
-                        Everything you need to go<br />
-                        from complex topic to clear understanding
+                        Translate complex concepts, technical docs, and code logic<br />
+                        into interactive flowcharts and structured study guides instantly.
                     </p>
                 </div>
 
@@ -82,19 +104,19 @@ export default function LandingPage() {
                     {/* Card 1 */}
                     <div className="c1-card c1-card-1">
                         <div className="c1-prompt-box">
-                            Explain the <span className="c1-blur-text">double-slit experiment</span> in quantum mechanics and create a <span className="c1-blur-text">visual diagram</span> of the <span className="c1-blur-text">wave interference pattern</span>.
+                            Generate a <span className="c1-blur-text">visual concept map</span> of <span className="c1-blur-text">Photosynthesis</span> detailing the light reactions and Calvin cycle.
                             {/* Glowing study tip popup */}
                             <div className="c1-tip-popup">
-                                ✦ Exam Tip: Quantum wave behaviors!
+                                ✦ Exam Tip: Focus on energy inputs/outputs!
                             </div>
                         </div>
                         <button className="c1-tips-btn">
-                            Add study tips <span className="c1-tips-star">✦</span>
+                            Visualize topic <span className="c1-tips-star">✦</span>
                         </button>
                         <svg className="c1-cursor" width="24" height="24" viewBox="0 0 24 24">
                             <path d="M4 2L20 11L11 13L9 22L4 2Z" strokeWidth="1" />
                         </svg>
-                        <h3>Smart Study Notes</h3>
+                        <h3>Structured Study Guides</h3>
                     </div>
 
                     {/* Card 2 */}
@@ -119,7 +141,7 @@ export default function LandingPage() {
                                 <path className="c1-svg-line-deco" d="M270 144 L270 152" strokeWidth="1" />
                             </svg>
                         </div>
-                        <h3>Concept Diagrams</h3>
+                        <h3>Interactive Concept Maps</h3>
                     </div>
 
                     {/* Card 3 */}
@@ -150,7 +172,7 @@ export default function LandingPage() {
                             </svg>
                             Search study guides
                         </div>
-                        <h3>Revision Library</h3>
+                        <h3>Organized Study Library</h3>
                     </div>
                 </div>
             </div>
