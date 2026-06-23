@@ -114,7 +114,7 @@ export default function Sidebar({
                 </div>
 
                 {/* User Footer */}
-                <div className={`p-3 border-t space-y-1 sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
+                <div className={`p-3 border-t space-y-1.5 sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
                     <button
                         onClick={() => {
                             if (window.confirm("Are you sure you want to clear all chat history?")) {
@@ -122,16 +122,22 @@ export default function Sidebar({
                                 onClose();
                             }
                         }}
-                        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg sync-theme-transition text-sm text-left ${isDarkMode ? 'hover:bg-red-500/10 text-zinc-400 hover:text-red-400' : 'hover:bg-red-500/5 text-gray-500 hover:text-red-500'}`}
+                        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg sync-theme-transition text-sm text-left border border-transparent ${
+                            isDarkMode 
+                                ? 'text-zinc-400 hover:bg-zinc-800/40 hover:text-red-400' 
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-red-600'
+                        }`}
                     >
                         <Trash2 className="w-4 h-4" />
                         <span>Clear all chats</span>
                     </button>
-                    <div className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm">
-                        <div className="w-8 h-8 rounded bg-green-600 flex items-center justify-center text-white font-bold">
+                    <div className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E8A838] to-[#F5C344] flex items-center justify-center text-white font-semibold select-none shadow-sm">
                             U
                         </div>
-                        <div className="flex-1 text-left font-medium select-none">Study User</div>
+                        <div className={`flex-1 text-left font-medium select-none sync-theme-transition ${isDarkMode ? 'text-zinc-300' : 'text-gray-700'}`}>
+                            Study User
+                        </div>
                     </div>
                 </div>
             </div>
