@@ -11,35 +11,21 @@ interface ChatInterfaceProps {
     onSendMessage: (message: string) => void;
     isLoading: boolean;
     onToggleSidebar: () => void;
+    isDarkMode: boolean;
+    onToggleTheme: () => void;
 }
 
-export default function ChatInterface({ messages, onSendMessage, isLoading, onToggleSidebar }: ChatInterfaceProps) {
+export default function ChatInterface({ 
+    messages, 
+    onSendMessage, 
+    isLoading, 
+    onToggleSidebar, 
+    isDarkMode, 
+    onToggleTheme 
+}: ChatInterfaceProps) {
     const [input, setInput] = useState('');
-    const [isDarkMode, setIsDarkMode] = useState(true);
     const bottomRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // Sync theme with localStorage
-    useEffect(() => {
-        const storedTheme = localStorage.getItem('studybuddy-theme');
-        if (storedTheme === 'light') {
-            setIsDarkMode(false);
-        } else {
-            setIsDarkMode(true);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isDarkMode) {
-            localStorage.setItem('studybuddy-theme', 'dark');
-            document.body.classList.add('c1-dark-body');
-            document.body.classList.remove('c1-light-body');
-        } else {
-            localStorage.setItem('studybuddy-theme', 'light');
-            document.body.classList.add('c1-light-body');
-            document.body.classList.remove('c1-dark-body');
-        }
-    }, [isDarkMode]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +66,7 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
         <div className={`flex flex-col flex-1 h-full overflow-hidden font-sans transition-colors duration-300 ${isDarkMode ? 'bg-[#0D0D0D] text-[#F0EDE8]' : 'bg-[#ffffff] text-[#0f172a]'}`}>
             
             {/* Unified Top Header Bar */}
-            <header className={`flex items-center justify-between px-4 py-3.5 border-b sticky top-0 z-30 transition-colors duration-300 ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-800' : 'bg-[#ffffff] border-gray-100'}`}>
+            <header className={`flex items-center justify-between px-4 py-3 border-b sticky top-0 z-30 transition-colors duration-300 ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-900' : 'bg-[#ffffff] border-gray-100'}`}>
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar} 
@@ -89,15 +75,13 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                     >
                         <Menu className="w-5 h-5" />
                     </button>
-                    <div className="c1-logo select-none text-[1.8rem]">
-                        StudyBuddy<span className="c1-logo-dot">.</span>
-                    </div>
+                    {/* The brand logo was removed from here and moved to the sidebar */}
                 </div>
                 
                 <div className="flex items-center gap-3.5">
                     {/* Theme Toggle Button */}
                     <button 
-                        onClick={() => setIsDarkMode(!isDarkMode)} 
+                        onClick={onToggleTheme} 
                         className="c1-theme-toggle" 
                         aria-label="Toggle Theme"
                     >
@@ -141,14 +125,14 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
                                 <button 
                                     onClick={() => setInput("Explain Binary Search Tree")} 
-                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-800 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
+                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
                                 >
                                     "Explain Binary Search Tree"
                                     <div className="text-xs text-gray-400 mt-1">Visually explained</div>
                                 </button>
                                 <button 
                                     onClick={() => setInput("Quick Sort Algorithm")} 
-                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-800 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
+                                    className={`p-4 border rounded-xl text-left text-sm transition-colors duration-200 ${isDarkMode ? 'border-zinc-900 hover:bg-[#141414] text-gray-300' : 'border-gray-200 hover:bg-[#F4F8F9] text-gray-700'}`}
                                 >
                                     "Quick Sort Algorithm"
                                     <div className="text-xs text-gray-400 mt-1">With flowcharts</div>
@@ -175,7 +159,7 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                     <div className="max-w-3xl mx-auto">
                         <form 
                             onSubmit={handleSubmit} 
-                            className={`relative shadow-xl flex items-end border rounded-2xl overflow-hidden ring-1 transition-all duration-300 ${isDarkMode ? 'border-zinc-800 bg-[#141414] ring-white/5 focus-within:ring-white/10' : 'border-gray-200 bg-[#F4F8F9] ring-black/5 focus-within:ring-black/10'}`}
+                            className={`relative shadow-xl flex items-end border rounded-2xl overflow-hidden ring-1 transition-all duration-300 ${isDarkMode ? 'border-zinc-900 bg-[#141414] ring-white/5 focus-within:ring-white/10' : 'border-gray-200 bg-[#F4F8F9] ring-black/5 focus-within:ring-black/10'}`}
                         >
                             <textarea
                                 ref={textareaRef}
@@ -196,7 +180,7 @@ export default function ChatInterface({ messages, onSendMessage, isLoading, onTo
                                 <ArrowUp className="w-4 h-4" />
                             </button>
                         </form>
-                        <div className={`text-center mt-2.5 text-xs hidden md:block ${isDarkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+                        <div className={`text-center mt-2.5 text-xs hidden md:block ${isDarkMode ? 'text-[#a3a3a3]' : 'text-gray-400'}`}>
                             Study Buddy Research Preview. Use generated notes for review.
                         </div>
                     </div>

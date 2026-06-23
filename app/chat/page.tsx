@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import Sidebar from '@/components/Sidebar';
 import { generateStudyNotesAction } from '@/lib/ai-handler';
@@ -10,6 +10,29 @@ import { useChatStore } from '@/hooks/useChatStore';
 export default function ChatPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+    // Sync theme with localStorage
+    useEffect(() => {
+        const storedTheme = localStorage.getItem('studybuddy-theme');
+        if (storedTheme === 'light') {
+            setIsDarkMode(false);
+        } else {
+            setIsDarkMode(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isDarkMode) {
+            localStorage.setItem('studybuddy-theme', 'dark');
+            document.body.classList.add('c1-dark-body');
+            document.body.classList.remove('c1-light-body');
+        } else {
+            localStorage.setItem('studybuddy-theme', 'light');
+            document.body.classList.add('c1-light-body');
+            document.body.classList.remove('c1-dark-body');
+        }
+    }, [isDarkMode]);
 
     const {
         messages,
@@ -25,26 +48,14 @@ export default function ChatPage() {
     const handleSendMessage = async (inputStr: string) => {
         setIsLoading(true);
 
-        // Add User Message. Capture the Session ID used!
         const userMsg: Message = { role: 'user', content: inputStr };
         const sessionIdObj = addMessageToCurrent(userMsg);
-        // addMessageToCurrent returns string | undefined. 
-        // We know it returns string if it created a new chat, but TypeScript might infer void if not typed strictly.
-        // But our patched store returns the ID.
-
-        // Ensure we have a valid ID.
         const activeSessionId = typeof sessionIdObj === 'string' ? sessionIdObj : currentSessionId;
 
         try {
-            // Fetch AI Response (Real or Mock based on Env)
             const notes = await generateStudyNotesAction(inputStr, messages);
-
-            // Add AI Message with Notes Object to the SAME session
             const aiMsg: Message = { role: 'assistant', content: notes };
-
-            // Pass the activeSessionId to force it into the correct session
             addMessageToCurrent(aiMsg, activeSessionId || undefined);
-
         } catch (error) {
             console.error(error);
             const errorMsg: Message = {
@@ -68,8 +79,9 @@ export default function ChatPage() {
                     onLoadChat={loadChat}
                     onDeleteChat={deleteChat}
                     onClearAllChats={clearAllChats}
-                    isOpen={false} // Desktop doesn't use drawer overlay
+                    isOpen={false}
                     onClose={() => { }}
+                    isDarkMode={isDarkMode}
                 />
             </div>
 
@@ -84,6 +96,7 @@ export default function ChatPage() {
                     onClearAllChats={clearAllChats}
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}
+                    isDarkMode={isDarkMode}
                 />
             </div>
 
@@ -92,6 +105,8 @@ export default function ChatPage() {
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
                 onToggleSidebar={() => setIsSidebarOpen(true)}
+                isDarkMode={isDarkMode}
+                onToggleTheme={() => setIsDarkMode(!isDarkMode)}
             />
         </main>
     );
