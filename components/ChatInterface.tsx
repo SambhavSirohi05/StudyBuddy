@@ -145,9 +145,10 @@ export default function ChatInterface({
                                 <ChatMessage key={idx} message={msg} isDarkMode={isDarkMode} />
                             ))}
                             {isLoading && (
-                                <ThinkingIndicator query={
-                                    messages.filter(m => m.role === 'user').pop()?.content as string
-                                } />
+                                <ThinkingIndicator 
+                                    isDarkMode={isDarkMode}
+                                    query={messages.filter(m => m.role === 'user').pop()?.content as string} 
+                                />
                             )}
                             <div ref={bottomRef} />
                         </div>

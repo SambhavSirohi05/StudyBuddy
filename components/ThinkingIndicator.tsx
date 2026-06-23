@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Brain, GitBranch, FileText, Sparkles, CheckCircle2 } from 'lucide-react';
+import { clsx } from 'clsx';
 
 interface ThinkingIndicatorProps {
     query?: string;
+    isDarkMode: boolean;
 }
 
 const THINKING_STEPS = [
@@ -14,7 +16,7 @@ const THINKING_STEPS = [
     { icon: Sparkles, label: 'Preparing exam tips', duration: 4000 },
 ];
 
-export default function ThinkingIndicator({ query }: ThinkingIndicatorProps) {
+export default function ThinkingIndicator({ query, isDarkMode }: ThinkingIndicatorProps) {
     const [currentStep, setCurrentStep] = useState(0);
 
     useEffect(() => {
@@ -47,7 +49,10 @@ export default function ThinkingIndicator({ query }: ThinkingIndicatorProps) {
         : 'your question';
 
     return (
-        <div className="w-full py-2 md:py-4 bg-[#2A2A2A] border-b border-white/5">
+        <div className={clsx(
+            "w-full py-2 md:py-4 border-b sync-theme-transition",
+            isDarkMode ? 'bg-[#0D0D0D] border-zinc-900/40' : 'bg-[#ffffff] border-gray-100/50'
+        )}>
             <div className="text-base gap-4 md:gap-6 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-4 md:py-6 flex lg:px-0 m-auto">
                 {/* Avatar */}
                 <div className="w-8 flex flex-col relative items-end">
@@ -58,8 +63,11 @@ export default function ThinkingIndicator({ query }: ThinkingIndicatorProps) {
 
                 {/* Steps */}
                 <div className="flex-1 space-y-3">
-                    <div className="text-sm text-gray-400 mb-3">
-                        Thinking about <span className="text-gray-200 font-medium">"{topicSnippet}"</span>
+                    <div className={clsx(
+                        "text-sm mb-3 sync-theme-transition",
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    )}>
+                        Thinking about <span className={clsx("font-medium sync-theme-transition", isDarkMode ? "text-gray-200" : "text-gray-800")}>"{topicSnippet}"</span>
                     </div>
 
                     <div className="space-y-2">
@@ -67,16 +75,18 @@ export default function ThinkingIndicator({ query }: ThinkingIndicatorProps) {
                             const StepIcon = step.icon;
                             const isActive = index === currentStep;
                             const isCompleted = index < currentStep;
-                            const isPending = index > currentStep;
 
                             return (
                                 <div
                                     key={index}
-                                    className={`flex items-center gap-3 text-sm transition-all duration-500 ${
-                                        isActive ? 'text-green-400' :
-                                        isCompleted ? 'text-gray-500' :
-                                        'text-gray-600'
-                                    }`}
+                                    className={clsx(
+                                        "flex items-center gap-3 text-sm transition-all duration-500",
+                                        isActive 
+                                            ? 'text-green-500' 
+                                            : isCompleted 
+                                                ? (isDarkMode ? 'text-gray-500' : 'text-gray-400') 
+                                                : (isDarkMode ? 'text-zinc-700' : 'text-gray-300')
+                                    )}
                                 >
                                     <div className="w-5 h-5 flex items-center justify-center">
                                         {isCompleted ? (
@@ -84,12 +94,16 @@ export default function ThinkingIndicator({ query }: ThinkingIndicatorProps) {
                                         ) : isActive ? (
                                             <StepIcon className="w-4 h-4 animate-pulse" />
                                         ) : (
-                                            <div className="w-2 h-2 rounded-full bg-gray-600" />
+                                            <div className={clsx(
+                                                "w-2 h-2 rounded-full sync-theme-transition",
+                                                isDarkMode ? 'bg-zinc-800' : 'bg-gray-250'
+                                            )} />
                                         )}
                                     </div>
-                                    <span className={`transition-all duration-300 ${
+                                    <span className={clsx(
+                                        "transition-all duration-300",
                                         isActive ? 'font-medium' : ''
-                                    }`}>
+                                    )}>
                                         {step.label}
                                         {isActive && (
                                             <span className="inline-flex ml-1">
