@@ -66,7 +66,7 @@ export default function ChatInterface({
         <div className={`flex flex-col flex-1 h-full overflow-hidden font-sans sync-theme-transition ${isDarkMode ? 'bg-[#0D0D0D] text-[#F0EDE8]' : 'bg-[#ffffff] text-[#0f172a]'}`}>
             
             {/* Unified Top Header Bar */}
-            <header className={`flex items-center justify-between px-4 py-3 border-b sticky top-0 z-30 sync-theme-transition ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-900' : 'bg-[#ffffff] border-gray-100'}`}>
+            <header className={`flex items-center justify-between px-4 h-16 border-b sticky top-0 z-30 sync-theme-transition ${isDarkMode ? 'bg-[#0D0D0D] border-zinc-900' : 'bg-[#ffffff] border-gray-100'}`}>
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={onToggleSidebar} 

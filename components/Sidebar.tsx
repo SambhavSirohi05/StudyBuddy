@@ -56,7 +56,7 @@ export default function Sidebar({
                 </div>
 
                 {/* Brand Header Logo (Above New Chat Button) */}
-                <div className={`px-4 py-4.5 border-b flex items-center justify-between sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
+                <div className={`px-4 h-16 border-b flex items-center justify-between sync-theme-transition ${isDarkMode ? 'border-zinc-900' : 'border-gray-100'}`}>
                     <div className="c1-logo select-none text-[1.8rem]">
                         StudyBuddy<span className="c1-logo-dot">.</span>
                     </div>
