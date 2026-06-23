@@ -72,16 +72,12 @@ function ChatMessageContent({ message, isDarkMode }: ChatMessageProps) {
         <div className={clsx(
             "w-full text-base border-b sync-theme-transition",
             isDarkMode ? "border-zinc-900/60" : "border-gray-100",
-            isUser 
-                ? (isDarkMode ? "bg-[#141414] text-gray-100" : "bg-[#F4F8F9] text-gray-800") 
-                : (isDarkMode ? "bg-[#0D0D0D] text-gray-200" : "bg-[#ffffff] text-gray-800")
+            isDarkMode ? "bg-[#0D0D0D] text-gray-200" : "bg-[#ffffff] text-gray-800"
         )}>
             <div className={clsx(
                 "w-full py-2 md:py-4 border-b sync-theme-transition",
                 isDarkMode ? "border-zinc-900/40" : "border-gray-100/50",
-                isUser 
-                    ? (isDarkMode ? "bg-[#141414]" : "bg-[#F4F8F9]") 
-                    : (isDarkMode ? "bg-[#0D0D0D]" : "bg-[#ffffff]")
+                isDarkMode ? "bg-[#0D0D0D]" : "bg-[#ffffff]"
             )}>
                 <div className="text-base gap-4 md:gap-6 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-4 md:py-6 flex lg:px-0 m-auto">
 
