@@ -142,7 +142,7 @@ export default function ChatInterface({
                     ) : (
                         <div className="w-full pb-36">
                             {messages.map((msg, idx) => (
-                                <ChatMessage key={idx} message={msg} />
+                                <ChatMessage key={idx} message={msg} isDarkMode={isDarkMode} />
                             ))}
                             {isLoading && (
                                 <ThinkingIndicator query={
